@@ -8,7 +8,6 @@ import logging
 from django.dispatch import receiver
 
 from openedx.core.djangoapps.credentials.helpers import is_learner_records_enabled_for_org
-from openedx.core.djangoapps.models.config.waffle import enable_course_detail_update_certificate_date
 from openedx.core.djangoapps.signals.signals import (
     COURSE_CERT_AWARDED,
     COURSE_CERT_CHANGED,
@@ -182,23 +181,20 @@ def handle_course_cert_revoked(sender, user, course_key, mode, status, **kwargs)
 
 
 @receiver(COURSE_CERT_DATE_CHANGE, dispatch_uid='course_certificate_date_change_handler')
-def handle_course_cert_date_change(sender, course_key, **kwargs):  # lint-amnesty, pylint: disable=unused-argument
+def handle_course_cert_date_change(sender, course_key, available_date, **kwargs):  # lint-amnesty, pylint: disable=unused-argument
     """
     If course is updated and the certificate_available_date is changed,
     schedule a celery task to update visible_date for all certificates
     within course.
 
     Args:
-        course_key:
-            refers to the course whose certificate_available_date was updated.
+        course_key (CourseLocator): refers to the course whose certificate_available_date was updated.
+        available_date (datetime): the date to update the certificate's available date to
 
     Returns:
         None
 
     """
-    # Stop if cert date updating isn't in effect for the course
-    if not enable_course_detail_update_certificate_date(course_key):
-        return
 
     # Import here instead of top of file since this module gets imported before
     # the credentials app is loaded, resulting in a Django deprecation warning.
@@ -216,4 +212,4 @@ def handle_course_cert_date_change(sender, course_key, **kwargs):  # lint-amnest
 
     # import here, because signal is registered at startup, but items in tasks are not yet loaded
     from openedx.core.djangoapps.programs.tasks import update_certificate_visible_date_on_course_update
-    update_certificate_visible_date_on_course_update.delay(str(course_key))
+    update_certificate_visible_date_on_course_update.delay(str(course_key), available_date)

@@ -24,7 +24,6 @@ from importlib import import_module
 from urllib.parse import urlencode
 import warnings
 
-import six
 from config_models.models import ConfigurationModel
 from django.apps import apps
 from django.conf import settings
@@ -53,7 +52,6 @@ from opaque_keys.edx.django.models import CourseKeyField, LearningContextKeyFiel
 from opaque_keys.edx.keys import CourseKey
 from pytz import UTC, timezone
 from simple_history.models import HistoricalRecords
-from six import text_type
 from slumber.exceptions import HttpClientError, HttpServerError
 from user_util import user_util
 
@@ -1488,6 +1486,17 @@ class CourseEnrollment(models.Model):
                 'run': self.course_id.run,
                 'mode': self.mode,
             }
+            # DENG-803: For segment events forwarded along to Hubspot, duplicate the `properties`
+            # section of the event payload into the `traits` section so that they can be received.
+            # This is a temporary fix until we implement this behavior outside of the LMS.
+            # TODO: DENG-804: remove the properties duplication in the event traits.
+            segment_traits = dict(segment_properties)
+            # Add course_title to the traits, as it is used by Hubspot filters
+            segment_traits['course_title'] = self.course_overview.display_name if self.course_overview else None
+            # Hubspot requires all incoming events have an email address to link it
+            # to a Contact object.
+            segment_traits['email'] = self.user.email
+
             if event_name == EVENT_NAME_ENROLLMENT_ACTIVATED:
                 segment_properties['email'] = self.user.email
                 # This next property is for an experiment, see method's comments for more information
@@ -1495,7 +1504,7 @@ class CourseEnrollment(models.Model):
                                                                                                        self.course_id)
             with tracker.get_tracker().context(event_name, context):
                 tracker.emit(event_name, data)
-                segment.track(self.user_id, event_name, segment_properties)
+                segment.track(self.user_id, event_name, segment_properties, traits=segment_traits)
 
         except Exception:  # pylint: disable=broad-except
             if event_name and self.course_id:

@@ -8,10 +8,10 @@ Accepted
 Background
 ----------
 Users can earn a course certificate in a particular course run (the certificate
-is stored in the GeneratedCertificate model). If a user has not earned a certificate
+is stored in the *GeneratedCertificate* model). If a user has not earned a certificate
 but the course staff would like them to have a certificate anyway, the user can
 be added to the certificate allowlist for the course run. The allowlist is currently
-stored in the CertificateWhitelist model, and was previously referred to as the
+stored in the *CertificateWhitelist* model, and was previously referred to as the
 certificate whitelist.
 
 Requirements
@@ -22,12 +22,15 @@ won't necessarily have a course certificate available to them. To receive a
 downloadable allowlist course certificate, the following things must be true at
 the time the certificate is generated:
 
-* The user must be enrolled in the course
+* The user must have an enrollment in the course
+
+  * The enrollment mode must be eligible for a certificate
+  * The enrollment does not need to be active
+
 * The user must have an approved, unexpired, ID verification
-* The user must be on the allowlist for the course run (see the CertificateWhitelist model)
-* The user must not have an invalidated certificate for the course run (see the CertificateInvalidation model)
-* Certificate generation must be enabled for the course run
-* Automatic certificate generation must be enabled
+* The user must be on the allowlist for the course run (see the *CertificateWhitelist* model)
+* The user must not have an invalidated certificate for the course run (see the *CertificateInvalidation* model)
+* Automatic certificate generation must be globally enabled
 
 Note: the above requirements were written for the allowlist, which assumes the
 CourseWaffleFlag *certificates_revamp.use_allowlist* has been enabled for the

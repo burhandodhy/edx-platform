@@ -3,7 +3,6 @@ Provide django models to back the discussions app
 """
 from __future__ import annotations
 import logging
-from typing import List
 
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -23,7 +22,7 @@ from openedx.core.djangoapps.content.course_overviews.models import CourseOvervi
 log = logging.getLogger(__name__)
 
 
-def get_supported_providers() -> List[str]:
+def get_supported_providers() -> list[str]:
     """
     Return the list of supported discussion providers
 
@@ -96,7 +95,7 @@ class ProviderFilter(StackedConfigurationModel):
         )
 
     @property
-    def available_providers(self) -> List[str]:
+    def available_providers(self) -> list[str]:
         """
         Return a filtered list of available providers
         """
@@ -116,7 +115,7 @@ class ProviderFilter(StackedConfigurationModel):
         return _providers
 
     @classmethod
-    def get_available_providers(cls, course_key: CourseKey) -> List[str]:
+    def get_available_providers(cls, course_key: CourseKey) -> list[str]:
         _filter = cls.current(course_key=course_key)
         providers = _filter.available_providers
         return providers
@@ -202,9 +201,9 @@ class DiscussionsConfiguration(TimeStampedModel):
     # pylint: enable=undefined-variable
 
     @property
-    def available_providers(self) -> List[str]:
+    def available_providers(self) -> list[str]:
         return ProviderFilter.current(course_key=self.context_key).available_providers
 
     @classmethod
-    def get_available_providers(cls, context_key: CourseKey) -> List[str]:
+    def get_available_providers(cls, context_key: CourseKey) -> list[str]:
         return ProviderFilter.current(course_key=context_key).available_providers

@@ -71,7 +71,7 @@ def _log_start_date_change(previous_course_overview, updated_course_overview):  
     new_start_str = 'None'
     if updated_course_overview.start is not None:
         new_start_str = updated_course_overview.start.isoformat()
-    LOG.info(u'Course start date changed: course={0} previous={1} new={2}'.format(
+    LOG.info('Course start date changed: course={} previous={} new={}'.format(
         updated_course_overview.id,
         previous_start_str,
         new_start_str,
@@ -95,4 +95,8 @@ def _check_for_cert_availability_date_changes(previous_course_overview, updated_
             f"{previous_course_overview.certificate_available_date} to " +
             f"{updated_course_overview.certificate_available_date}. Sending COURSE_CERT_DATE_CHANGE signal."
         )
-        COURSE_CERT_DATE_CHANGE.send_robust(sender=None, course_key=updated_course_overview.id)
+        COURSE_CERT_DATE_CHANGE.send_robust(
+            sender=None,
+            course_key=updated_course_overview.id,
+            available_date=updated_course_overview.certificate_available_date
+        )

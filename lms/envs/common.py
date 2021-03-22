@@ -714,7 +714,17 @@ FEATURES = {
     # .. toggle_tickets: https://openedx.atlassian.net/browse/SOL-1325
     'ENABLE_OPENBADGES': False,
 
-    # Enable LTI Provider feature.
+    # .. toggle_name: FEATURES['ENABLE_LTI_PROVIDER']
+    # .. toggle_implementation: DjangoSetting
+    # .. toggle_default: False
+    # .. toggle_description: When set to True, Open edX site can be used as an LTI Provider to other systems
+    #    and applications.
+    # .. toggle_warnings: After enabling this feature flag there are multiple steps invloved to configure edX
+    #    as LTI provider. Full guide is available here:
+    #    https://edx.readthedocs.io/projects/edx-installing-configuring-and-running/en/latest/configuration/lti/index.html
+    # .. toggle_use_cases: open_edx
+    # .. toggle_creation_date: 2015-04-24
+    # .. toggle_tickets: https://github.com/edx/edx-platform/pull/7689
     'ENABLE_LTI_PROVIDER': False,
 
     # .. toggle_name: FEATURES['SHOW_HEADER_LANGUAGE_SELECTOR']
@@ -2017,10 +2027,13 @@ MIDDLEWARE = [
 
     # A newer and safer request cache.
     'edx_django_utils.cache.middleware.RequestCacheMiddleware',
-    'edx_django_utils.monitoring.CachedCustomMonitoringMiddleware',
 
     # Generate code ownership attributes. Keep this immediately after RequestCacheMiddleware.
     'edx_django_utils.monitoring.CodeOwnerMonitoringMiddleware',
+
+    # Monitoring and logging middleware
+    'openedx.core.lib.request_utils.ExpectedErrorMiddleware',
+    'edx_django_utils.monitoring.CachedCustomMonitoringMiddleware',
 
     # Cookie monitoring
     'openedx.core.lib.request_utils.CookieMonitoringMiddleware',
@@ -3134,6 +3147,7 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
     ),
+    'EXCEPTION_HANDLER': 'openedx.core.lib.request_utils.expected_error_exception_handler',
     'PAGE_SIZE': 10,
     'URL_FORMAT_OVERRIDE': None,
     'DEFAULT_THROTTLE_RATES': {
