@@ -200,6 +200,10 @@ class GeneratedCertificate(models.Model):
     .. pii: PII can exist in the generated certificate linked to in this model. Certificate data is currently retained.
     .. pii_types: name, username
     .. pii_retirement: retained
+
+    The grade stored in this model is set at the same time as the status. This GeneratedCertificate grade is *not*
+    updated whenever the user's course grade changes and it should not be considered the source of truth. It is
+    suggested that the PersistentCourseGrade be used instead.
     """
     # Import here instead of top of file since this module gets imported before
     # the course_modes app is loaded, resulting in a Django deprecation warning.
